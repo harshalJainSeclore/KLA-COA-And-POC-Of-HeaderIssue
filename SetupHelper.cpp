@@ -18,12 +18,12 @@ constexpr wchar_t kCompany[] = L"Seclore Technology Pvt. Ltd.";
 constexpr wchar_t kName[] = L"My Component";
 constexpr wchar_t kDescription[] = L"My component description";
 constexpr wchar_t kVersion[] = L"1.0.0.0";
-constexpr wchar_t kInstallPath[] = L"C:\\Program Files\\MyComponent";
+constexpr wchar_t kInstallPath[] = L"C:\\Program Files (x86)\\Seclore\\FileSecure\\Desktop Client";
 constexpr wchar_t kReleaseNotes[] = L"ReleaseNotes.txt";
-constexpr wchar_t kAssistant[] = L"MyAssistant.dll";
+constexpr wchar_t kAssistant[] = L"FSDCAssistant.dll";
 constexpr wchar_t kResCollFolder[] = L"Resources";
 constexpr wchar_t kUrl[] = L"/downloads/mycomponent";
-constexpr wchar_t kUninstallString[] = L"{PRODUCT-CODE}";
+constexpr wchar_t kUninstallString[] = L"{12345678-1234-1234-1234-1234567890AB}";
 constexpr wchar_t kCurrentVersion[] = L"1.0.0.0";
 
 void copyToBuffer(const wchar_t* source, wchar_t* destination, std::size_t destinationCount)
@@ -43,8 +43,8 @@ ComponentInfoExW createComponentInfo()
     ComponentInfoExW info{};
     info.mlSize = COMPONENTINFOEXW_SIZE_VER_1;
     info.mType = CompTypeApp;
-    info.mbUpdatable = true;
-    info.mbDependent = false;
+    info.mbUpdatable = 0;
+    info.mbDependent = 1;
     info.mlSequence = 0;
     info.mUnistType = UninstTypeProductCode;
 
