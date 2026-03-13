@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       - name: Configure CMake
-        run: cmake -S . -B out -G "Visual Studio 17 2022" -A x86 -T v142
+        run: cmake -S . -B out -G "Visual Studio 17 2022" -A Win32 -T v142
 
       - name: Build
         run: cmake --build out --config Release
@@ -30,7 +30,7 @@ jobs:
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
-          name: SetupHelper-windows-x64
+          name: SetupHelper-windows-x86
           path: build/SetupHelper.exe
           if-no-files-found: error
 
