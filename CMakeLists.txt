@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(SetupHelper LANGUAGES CXX)
+
+add_executable(SetupHelper SetupHelper.cpp)
+
+target_compile_features(SetupHelper PRIVATE cxx_std_17)
+
+set_target_properties(
+    SetupHelper
+    PROPERTIES
+        CXX_EXTENSIONS OFF
+)

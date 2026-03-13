@@ -1,0 +1,30 @@
+name: Build SetupHelper
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -S . -B build -G "Visual Studio 16 2019" -A x64 -T v142
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: SetupHelper-windows-x64
+          path: build/Release/SetupHelper.exe
+          if-no-files-found: error
