@@ -13,17 +13,17 @@ using RegisterComponentExWFn = long (*)(ComponentInfoExW*, wchar_t*);
 using UnregisterComponentWFn = long (*)(wchar_t*, wchar_t*);
 
 constexpr wchar_t kDllPath[] = L"C:\\Program Files (x86)\\Seclore\\FileSecure\\Desktop Client\\setuphelper.dll";
-constexpr wchar_t kComponentId[] = L"MyComponent";
+constexpr wchar_t kComponentId[] = L"{33EB9B69-0CC4-4561-8E50-B91E8536B2AD}";
 constexpr wchar_t kCompany[] = L"Seclore Technology Pvt. Ltd.";
 constexpr wchar_t kName[] = L"My Component";
 constexpr wchar_t kDescription[] = L"My component description";
 constexpr wchar_t kVersion[] = L"1.0.0.0";
-constexpr wchar_t kInstallPath[] = L"C:\\Program Files (x86)\\Seclore\\FileSecure\\Desktop Client";
+constexpr wchar_t kInstallPath[] = L"C:\\Program Files (x86)\\Seclore\\FileSecure\\Desktop Client\\Addon\\OfflineAgent\\";
 constexpr wchar_t kReleaseNotes[] = L"ReleaseNotes.txt";
-constexpr wchar_t kAssistant[] = L"FSDCAssistant.dll";
+constexpr wchar_t kAssistant[] = L"C:\\Program Files (x86)\\Seclore\\FileSecure\\Desktop Client\\Addon\\OfflineAgent\\..\\..\\FSDCAssistant.dll";
 constexpr wchar_t kResCollFolder[] = L"Resources";
 constexpr wchar_t kUrl[] = L"/downloads/mycomponent";
-constexpr wchar_t kUninstallString[] = L"{12345678-1234-1234-1234-1234567890AB}";
+constexpr wchar_t kUninstallString[] = L"{2DC55591-1FF4-471F-B0F5-B5254DF734D0}";
 constexpr wchar_t kCurrentVersion[] = L"1.0.0.0";
 
 void copyToBuffer(const wchar_t* source, wchar_t* destination, std::size_t destinationCount)
@@ -42,10 +42,10 @@ ComponentInfoExW createComponentInfo()
 {
     ComponentInfoExW info{};
     info.mlSize = COMPONENTINFOEXW_SIZE_VER_1;
-    info.mType = CompTypeApp;
+    info.mType = CompTypeAddon;
     info.mbUpdatable = 0;
     info.mbDependent = 1;
-    info.mlSequence = 0;
+    info.mlSequence = 6;
     info.mUnistType = UninstTypeProductCode;
 
     copyToBuffer(kComponentId, info.mstrId, std::size(info.mstrId));
