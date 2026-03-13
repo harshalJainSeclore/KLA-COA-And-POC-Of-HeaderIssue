@@ -12,7 +12,7 @@ namespace
 using RegisterComponentExWFn = long (*)(ComponentInfoExW*, wchar_t*);
 using UnregisterComponentWFn = long (*)(wchar_t*, wchar_t*);
 
-constexpr wchar_t kDllPath[] = L"D:\\Work\\KLA COA\\build\\setuphelper.dll";
+constexpr wchar_t kDllPath[] = L"setuphelper.dll";
 constexpr wchar_t kComponentId[] = L"MyComponent";
 constexpr wchar_t kCompany[] = L"Seclore Technology Pvt. Ltd.";
 constexpr wchar_t kName[] = L"My Component";
