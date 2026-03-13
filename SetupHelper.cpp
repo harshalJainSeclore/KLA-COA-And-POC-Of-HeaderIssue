@@ -5,8 +5,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "setupHelper.h"
-
 namespace
 {
 using RegisterComponentExWFn = long (*)(ComponentInfoExW*, wchar_t*);
