@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configure CMake
         run: cmake -S . -B build -G "Visual Studio 16 2019" -A x64 -T v142
