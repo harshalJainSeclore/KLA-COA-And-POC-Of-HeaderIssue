@@ -1,5 +1,8 @@
 name: Build SetupHelper
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -15,16 +18,38 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Configure CMake
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -T v142
+        run: cmake -S . -B out -G "Visual Studio 17 2022" -A x64 -T v142
 
       - name: Build
-        run: cmake --build build --config Release
+        run: cmake --build out --config Release
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
           name: SetupHelper-windows-x64
-          path: build/Release/SetupHelper.exe
+          path: build/SetupHelper.exe
           if-no-files-found: error
+
+      - name: Commit built binary
+        if: github.event_name != 'pull_request' && github.actor != 'github-actions[bot]'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "build/SetupHelper.exe")) {
+            throw "Built binary not found at build/SetupHelper.exe"
+          }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build/SetupHelper.exe
+
+          if (git diff --cached --quiet) {
+            Write-Host "No binary changes to commit."
+            exit 0
+          }
+
+          git commit -m "Update built SetupHelper binary [skip ci]"
+          git push
