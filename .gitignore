@@ -1,1 +1,3 @@
-/build/
+# Local / CI build outputs (download SetupHelper.exe + .pdb from GitHub Actions artifacts)
+/build/**
+!/build/.gitkeep

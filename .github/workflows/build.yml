@@ -1,7 +1,8 @@
 name: Build SetupHelper
 
+# Binaries and PDBs are not committed; download them from the workflow run's artifacts.
 permissions:
-  contents: write
+  contents: read
 
 on:
   push:
@@ -41,7 +42,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path "build" | Out-Null
           Copy-Item -LiteralPath $pdb.FullName -Destination "build/SetupHelper.pdb" -Force
 
-      # Symbols ship with the exe for crash debugging; end users rarely install PDBs—support/IT uses them matching the same build.
+      # Shipped exe + PDB: Actions → this run → Artifacts (same build id for both files).
       - name: Upload executable and PDB
         uses: actions/upload-artifact@v4
         with:
@@ -50,27 +51,3 @@ jobs:
             build/SetupHelper.exe
             build/SetupHelper.pdb
           if-no-files-found: error
-
-      - name: Commit built binary and PDB
-        if: github.event_name != 'pull_request' && github.actor != 'github-actions[bot]'
-        shell: pwsh
-        run: |
-          if (-not (Test-Path "build/SetupHelper.exe")) {
-            throw "Built binary not found at build/SetupHelper.exe"
-          }
-          if (-not (Test-Path "build/SetupHelper.pdb")) {
-            throw "PDB not found at build/SetupHelper.pdb (check MSVC /Zi + /DEBUG in CMake)"
-          }
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # build/ is gitignored; force-add so CI can still commit shipped binaries + symbols
-          git add -f build/SetupHelper.exe build/SetupHelper.pdb
-
-          if (git diff --cached --quiet) {
-            Write-Host "No binary changes to commit."
-            exit 0
-          }
-
-          git commit -m "Update built SetupHelper binary and PDB [skip ci]"
-          git push
