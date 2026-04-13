@@ -1,6 +1,8 @@
 name: Build SetupHelper
 
-# Binaries and PDBs are not committed; download them from the workflow run's artifacts.
+# Artifacts (every run): GitHub repo → Actions → "Build SetupHelper" → open a run → Artifacts.
+# Versioned downloads: push a tag v* (e.g. v0.1.0) to trigger "Release SetupHelper" → Releases page.
+# Binaries are not stored in git; download from Artifacts or Releases.
 permissions:
   contents: read
 

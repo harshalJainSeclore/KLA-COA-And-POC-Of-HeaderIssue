@@ -1,0 +1,52 @@
+# Creates a GitHub Release with exe + PDB when you push a tag like v1.0.0
+# (Releases page: repo → right sidebar "Releases", or /releases)
+
+name: Release SetupHelper
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure CMake
+        run: cmake -S . -B out -G "Visual Studio 17 2022" -A Win32 -T v142
+
+      - name: Build
+        run: cmake --build out --config Release
+
+      - name: Ensure SetupHelper.pdb is next to staged exe
+        shell: pwsh
+        run: |
+          if (Test-Path "build/SetupHelper.pdb") { exit 0 }
+          $pdb = Get-ChildItem -Path "out" -Recurse -Filter "SetupHelper.pdb" -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if (-not $pdb) {
+            throw "SetupHelper.pdb not found under out/ after build; check MSVC debug flags."
+          }
+          New-Item -ItemType Directory -Force -Path "build" | Out-Null
+          Copy-Item -LiteralPath $pdb.FullName -Destination "build/SetupHelper.pdb" -Force
+
+      - name: Zip exe and PDB for the release
+        shell: pwsh
+        run: |
+          $zip = "SetupHelper-windows-x86-${{ github.ref_name }}.zip"
+          Compress-Archive -LiteralPath "build/SetupHelper.exe", "build/SetupHelper.pdb" -DestinationPath $zip -Force
+          Write-Host "Created $zip"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SetupHelper-windows-x86-${{ github.ref_name }}.zip
+          generate_release_notes: true
