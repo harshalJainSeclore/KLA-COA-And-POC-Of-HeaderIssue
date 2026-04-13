@@ -27,6 +27,20 @@ jobs:
       - name: Build
         run: cmake --build out --config Release
 
+      # VS often emits the linker PDB under out/Release/ while the exe is redirected to build/;
+      # CMake POST_BUILD should copy it—this step recovers if that path still differs on the runner.
+      - name: Ensure SetupHelper.pdb is next to staged exe
+        shell: pwsh
+        run: |
+          if (Test-Path "build/SetupHelper.pdb") { exit 0 }
+          $pdb = Get-ChildItem -Path "out" -Recurse -Filter "SetupHelper.pdb" -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+          if (-not $pdb) {
+            throw "SetupHelper.pdb not found under out/ after build; check MSVC debug flags."
+          }
+          New-Item -ItemType Directory -Force -Path "build" | Out-Null
+          Copy-Item -LiteralPath $pdb.FullName -Destination "build/SetupHelper.pdb" -Force
+
       # Symbols ship with the exe for crash debugging; end users rarely install PDBs—support/IT uses them matching the same build.
       - name: Upload executable and PDB
         uses: actions/upload-artifact@v4
