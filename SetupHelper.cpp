@@ -191,8 +191,18 @@ int unregisterComponent(HMODULE module)
 }
 } // namespace
 
+// Set to false when you no longer need a pause at startup (e.g. attach debugger on this line).
+constexpr bool kStartupDebugMessageBox = true;
+
 int wmain(int argc, wchar_t* argv[])
 {
+    if (kStartupDebugMessageBox)
+    {
+        MessageBoxW(nullptr, L"SetupHelper started — click OK to continue.\n\n"
+                             L"(Disable: set kStartupDebugMessageBox to false in SetupHelper.cpp.)",
+                    L"SetupHelper debug", MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TOPMOST);
+    }
+
     if (argc != 2)
     {
         std::wcout << L"Usage: SetupHelper.exe register|unregister\n";
