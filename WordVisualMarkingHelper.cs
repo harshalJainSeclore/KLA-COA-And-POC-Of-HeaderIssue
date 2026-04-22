@@ -1,4 +1,4 @@
-﻿using Microsoft.Office.Interop.Word;
+using Microsoft.Office.Interop.Word;
 using Seclore.Util;
 using System;
 using System.Collections.Generic;
@@ -8,11 +8,32 @@ using WordInteropApplication = Microsoft.Office.Interop.Word.Application;   //CH
 
 namespace OfficePlugin.Office.Word
 {
+
+
+   
+
     public class WordVisualMarkingHelper : OfficeVisualMarkingHelper
     {
         private Tuple<WordInteropDocument, ComAttributes> mInteropDocument;		//CHANGE#17356_2_SANJEEV
         private readonly Dictionary<AttributedString.Alignment, WdParagraphAlignment> mReverseWordAlignmentMap;
-        public WordVisualMarkingHelper(OfficeDocument pDocument) :base (pDocument)
+
+
+        private bool IsRangeRtl(Range pRange, PluginsCommon.Util.ComObjectManager pComObjectManager)
+        {
+            try
+            {
+                ParagraphFormat lParaFormat = pComObjectManager.DisposableComObject(
+                    pRange.ParagraphFormat) as ParagraphFormat;
+                return lParaFormat.ReadingOrder == WdReadingOrder.wdReadingOrderRtl;
+            }
+            catch (Exception pException)
+            {
+                LoggerWrapper.LogDebug($"Could not read ReadingOrder in {MethodHelper.GetMethodName()} - {pException.Message}. Defaulting to LTR.");
+                return false;
+            }
+        }
+
+        public WordVisualMarkingHelper(OfficeDocument pDocument) : base(pDocument)
         {
             mInteropDocument = new Tuple<WordInteropDocument, ComAttributes>(mDocument.GetInnerDocument() as WordInteropDocument, new ComAttributes());		//CHANGE#17356_2_SANJEEV
             mReverseWordAlignmentMap = new Dictionary<AttributedString.Alignment, WdParagraphAlignment>()
@@ -22,7 +43,7 @@ namespace OfficePlugin.Office.Word
                 {AttributedString.Alignment.Right, WdParagraphAlignment.wdAlignParagraphRight }
             };
         }
-		//CHANGE#17356_2_SANJEEV_STARTS
+        //CHANGE#17356_2_SANJEEV_STARTS
         public override void Close()
         {
             using var lComObjectManager = new PluginsCommon.Util.ComObjectManager();
@@ -32,10 +53,10 @@ namespace OfficePlugin.Office.Word
                 mInteropDocument = null;
             }
         }
-		//CHANGE#17356_2_SANJEEV_ENDS
+        //CHANGE#17356_2_SANJEEV_ENDS
         public override void RefreshVisualMarkings(bool pbShouldRemoveExising = false)
         {
-            using(new CLogTraceHelper())
+            using (new CLogTraceHelper())
             {
                 LoggerWrapper.LogInfo($"Refreshing Visual Markings");
                 SetHeaderInternal();
@@ -64,7 +85,7 @@ namespace OfficePlugin.Office.Word
             try
             {
                 (lComObjectManager.DisposableComObject((
-                    lComObjectManager.DisposableComObject(mInteropDocument.Item1.Application) as WordInteropApplication).UndoRecord) as UndoRecord).StartCustomRecord(ResourceCollectionWrapper.GetResourceById(Constants.Message_Remove_Header));			
+                    lComObjectManager.DisposableComObject(mInteropDocument.Item1.Application) as WordInteropApplication).UndoRecord) as UndoRecord).StartCustomRecord(ResourceCollectionWrapper.GetResourceById(Constants.Message_Remove_Header));
                 List<Range> lHeaderRanges = GetAllHeaderRanges();
                 for (int i = 0; i < lHeaderRanges.Count; i++)
                 {
@@ -75,7 +96,7 @@ namespace OfficePlugin.Office.Word
             finally
             {
                 (lComObjectManager.DisposableComObject((
-                    lComObjectManager.DisposableComObject(mInteropDocument.Item1.Application) as WordInteropApplication).UndoRecord) as UndoRecord).EndCustomRecord();			
+                    lComObjectManager.DisposableComObject(mInteropDocument.Item1.Application) as WordInteropApplication).UndoRecord) as UndoRecord).EndCustomRecord();
             }
         }
         private void RemoveHeaderFromRange(Range pRange)
@@ -116,11 +137,11 @@ namespace OfficePlugin.Office.Word
             {
                 (lComObjectManager.DisposableComObject((
                     lComObjectManager.DisposableComObject(mInteropDocument
-                    .Item1.Application) as WordInteropApplication)		
+                    .Item1.Application) as WordInteropApplication)
                     .UndoRecord) as UndoRecord)
                     .StartCustomRecord(ResourceCollectionWrapper.GetResourceById(Constants.Message_Update_Header));
 
-                for (int i =  0; i < lRanges.Count; i++)
+                for (int i = 0; i < lRanges.Count; i++)
                 {
                     try
                     {
@@ -135,7 +156,7 @@ namespace OfficePlugin.Office.Word
             finally
             {
                 (lComObjectManager.DisposableComObject((
-                    lComObjectManager.DisposableComObject(mInteropDocument.Item1		
+                    lComObjectManager.DisposableComObject(mInteropDocument.Item1
                     .Application) as WordInteropApplication)
                     .UndoRecord) as UndoRecord)
                     .EndCustomRecord();
@@ -263,7 +284,7 @@ namespace OfficePlugin.Office.Word
             try
             {
                 (lComObjectManager.DisposableComObject((
-                    lComObjectManager.DisposableComObject(mInteropDocument.Item1		
+                    lComObjectManager.DisposableComObject(mInteropDocument.Item1
                     .Application) as WordInteropApplication)
                     .UndoRecord) as UndoRecord)
                     .StartCustomRecord(ResourceCollectionWrapper.GetResourceById(Constants.Message_Remove_Footer));
@@ -277,7 +298,7 @@ namespace OfficePlugin.Office.Word
             finally
             {
                 (lComObjectManager.DisposableComObject((
-                    lComObjectManager.DisposableComObject(mInteropDocument.Item1		
+                    lComObjectManager.DisposableComObject(mInteropDocument.Item1
                     .Application) as WordInteropApplication)
                     .UndoRecord) as UndoRecord)
                     .EndCustomRecord();
@@ -296,7 +317,7 @@ namespace OfficePlugin.Office.Word
                     return;
                 }
                 DeleteFields(lKeyVsFieldMap);
-                RemoveOrphanedSeparator(pRange,WdCollapseDirection.wdCollapseEnd);
+                RemoveOrphanedSeparator(pRange, WdCollapseDirection.wdCollapseEnd);
                 pRange.Collapse(WdCollapseDirection.wdCollapseStart);
             }
             catch
@@ -315,7 +336,7 @@ namespace OfficePlugin.Office.Word
             try
             {
                 (lComObjectManager.DisposableComObject((
-                    lComObjectManager.DisposableComObject(mInteropDocument.Item1.Application) as WordInteropApplication).UndoRecord) as UndoRecord)		
+                    lComObjectManager.DisposableComObject(mInteropDocument.Item1.Application) as WordInteropApplication).UndoRecord) as UndoRecord)
                     .StartCustomRecord(ResourceCollectionWrapper.GetResourceById(Constants.Message_Update_Footer));
                 List<Range> lRanges = GetAllFooterRanges();
                 for (int i = 0; i < lRanges.Count; i++)
@@ -333,7 +354,7 @@ namespace OfficePlugin.Office.Word
             finally
             {
                 (lComObjectManager.DisposableComObject((
-                    lComObjectManager.DisposableComObject(mInteropDocument.Item1		
+                    lComObjectManager.DisposableComObject(mInteropDocument.Item1
                     .Application) as WordInteropApplication)
                     .UndoRecord) as UndoRecord)
                     .EndCustomRecord();
@@ -347,7 +368,7 @@ namespace OfficePlugin.Office.Word
             List<Range> lRanges = new List<Range>();
             HeadersFooters lFooters = lComObjectManager.DisposableComObject((
                 lComObjectManager.DisposableComObject((
-                lComObjectManager.DisposableComObject(mInteropDocument.Item1		
+                lComObjectManager.DisposableComObject(mInteropDocument.Item1
                 .Sections) as Sections)
                 .First) as Section)
                 .Footers) as HeadersFooters;
@@ -510,11 +531,20 @@ namespace OfficePlugin.Office.Word
                 LoggerWrapper.LogDebug($"Exception Occured in {MethodHelper.GetMethodName()} - {pException.Message}");
             }
         }
-        private WdParagraphAlignment GetAlignment(AttributedString.Alignment pAlignment)
+
+
+        private WdParagraphAlignment GetAlignment(AttributedString.Alignment pAlignment, bool pbIsRtl = false)
         {
+            if (pbIsRtl)
+            {
+                if (pAlignment == AttributedString.Alignment.Left)
+                    pAlignment = AttributedString.Alignment.Right;
+                else if (pAlignment == AttributedString.Alignment.Right)
+                    pAlignment = AttributedString.Alignment.Left;
+                // Center stays as-is
+            }
             return mReverseWordAlignmentMap.TryGetValue(pAlignment, out WdParagraphAlignment lWdParagraphAlignment) ?
                 lWdParagraphAlignment : WdParagraphAlignment.wdAlignParagraphJustify;
-
         }
         private bool AreAllSectionsValid(Range pRange, Dictionary<string, Field> pFieldMap, AttributedString pAttributedString)
         {
@@ -527,9 +557,9 @@ namespace OfficePlugin.Office.Word
             }
 
             Dictionary<string, string> lChunkedMetaData = mDocument.GetEntireMetaData();
-            foreach (KeyValuePair<string, Field> lPair in pFieldMap)    
+            foreach (KeyValuePair<string, Field> lPair in pFieldMap)
             {
-                if(! lChunkedMetaData.TryGetValue(lPair.Key, out string lstrValue))
+                if (!lChunkedMetaData.TryGetValue(lPair.Key, out string lstrValue))
                 {
                     return false;
                 }
@@ -553,7 +583,7 @@ namespace OfficePlugin.Office.Word
             Dictionary<string, bool> lstrChunkedKeysPresentMap = mDocument.mMetaDataChunkHelper
                 .GetChunkedKeysFromOriginalKeys(new string[] { pstrProperty })
                 .ToDictionary(element => element, element => false);
-            
+
             Fields lFields = lComObjectManager.DisposableComObject(pRange.Fields) as Fields;
             for (int i = 1; i <= lFields.Count; i++)
             {
@@ -584,15 +614,19 @@ namespace OfficePlugin.Office.Word
         }
         private void PopulateField(Field pField, AttributedString pAttributedString)
         {
-            using var lComObjectManager = new PluginsCommon.Util.ComObjectManager();    //CHANGE#17356_SHUBHAM
+            using var lComObjectManager = new PluginsCommon.Util.ComObjectManager();
             Range lResult = lComObjectManager.DisposableComObject(pField.Result) as Range;
             Font lFont = lComObjectManager.DisposableComObject(lResult.Font) as Font;
-            (lComObjectManager.DisposableComObject(lResult.ParagraphFormat) as ParagraphFormat).
-                Alignment = GetAlignment(pAttributedString.GetAlignment());
+            ParagraphFormat lParaFormat = lComObjectManager.DisposableComObject(lResult.ParagraphFormat) as ParagraphFormat;
+
+            bool lbIsRtl = IsRangeRtl(lResult, lComObjectManager);  // ← NEW
+
+            lParaFormat.Alignment = GetAlignment(pAttributedString.GetAlignment(), lbIsRtl);  // ← CHANGED
+
             lFont.Size = pAttributedString.GetFontSize();
             System.Drawing.Color lColor = System.Drawing.ColorTranslator.FromHtml(pAttributedString.GetColorHexValue());
-            (lComObjectManager.DisposableComObject(lFont.TextColor) as ColorFormat).
-                    RGB = (lColor.R + 0x100 * lColor.G + 0x10000 * lColor.B);
+            (lComObjectManager.DisposableComObject(lFont.TextColor) as ColorFormat)
+                .RGB = (lColor.R + 0x100 * lColor.G + 0x10000 * lColor.B);
         }
         private void DeleteFields(Dictionary<string, Field> pKeyVsFieldMap)
         {
@@ -613,10 +647,14 @@ namespace OfficePlugin.Office.Word
             {
                 return false;
             }
+            // Replace the Alignment check block with this:
+
+            bool lbIsRtl = IsRangeRtl(lResult, lComObjectManager);  // ← NEW
+
             if (!(lComObjectManager.DisposableComObject(lResult
                 .ParagraphFormat) as ParagraphFormat)
                 .Alignment
-                .Equals(GetAlignment(pAttributedString.GetAlignment())))
+                .Equals(GetAlignment(pAttributedString.GetAlignment(), lbIsRtl)))  // ← CHANGED
             {
                 return false;
             }
